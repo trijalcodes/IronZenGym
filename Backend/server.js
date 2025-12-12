@@ -2,8 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const session = require('express-session');
-const MongoStore = require('connect-mongo');
+
 const cookieParser = require('cookie-parser');
 
 const app = express();
@@ -55,23 +54,6 @@ if (!mongoUri) {
 // ---------------------------------------
 // 🔥 SESSION MUST BE INITIALIZED BEFORE ROUTES AND BEFORE mongoose.then()
 // ---------------------------------------
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "dev-secret",
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-      mongoUrl: mongoUri,
-      collectionName: "sessions"
-    }),
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 24,
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    },
-  })
-);
 
 // ---------------------------------------
 // CONNECT MONGO
