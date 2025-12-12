@@ -6,11 +6,10 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const cookieParser = require('cookie-parser');
 
-// Initialize app
 const app = express();
 
 // ---------------------------------------
-// 🔥 Allowed Origins FIX
+// ALLOWED ORIGINS (DEFINED FIRST)
 // ---------------------------------------
 const allowedOrigins = [
   "http://localhost:5173",
@@ -18,7 +17,7 @@ const allowedOrigins = [
 ];
 
 // ---------------------------------------
-// 🔥 Global CORS FIX (must be at top)
+// GLOBAL CORS MIDDLEWARE (AT TOP)
 // ---------------------------------------
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Credentials", "true");
@@ -27,7 +26,7 @@ app.use((req, res, next) => {
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // Thunder/Postman
+    if (!origin) return callback(null, true); // allow Postman/Thunder
     if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
@@ -39,22 +38,21 @@ app.use(cors({
 
 app.options("*", cors());
 
-// Middleware
+// ---------------------------------------
 app.use(express.json());
 app.use(cookieParser());
 
-// ---------- MongoDB Connection + Session Store Setup ----------
-
-// Normalize & validate URI
+// ---------------------------------------
+// MONGO CONNECTION
+// ---------------------------------------
 const rawUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 const mongoUri = rawUri ? rawUri.trim() : null;
 
 if (!mongoUri) {
-  console.error('❌ FATAL: MONGO_URI not found in .env');
+  console.error('❌ FATAL: MONGO_URI missing');
   process.exit(1);
 }
 
-// Connect Mongoose first
 mongoose.connect(mongoUri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -62,10 +60,9 @@ mongoose.connect(mongoUri, {
 .then(async () => {
   console.log('✅ MongoDB connected');
 
-  // Try to reuse mongoose client (best method)
   let storeOptions = {};
   const client = mongoose.connection.getClient 
-    ? mongoose.connection.getClient() 
+    ? mongoose.connection.getClient()
     : null;
 
   if (client) {
@@ -81,8 +78,7 @@ mongoose.connect(mongoUri, {
   }
 
   // ---------------------------------------
-  // 🔥 Session Middleware FIX
-  // (Your original had wrong location + duplicate CORS)
+  // SESSION MIDDLEWARE
   // ---------------------------------------
   app.use(session({
     secret: process.env.SESSION_SECRET || "dev-secret",
@@ -90,14 +86,16 @@ mongoose.connect(mongoUri, {
     saveUninitialized: false,
     store: MongoStore.create(storeOptions),
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      maxAge: 1000 * 60 * 60 * 24,
       httpOnly: true,
-      secure: true,        // REQUIRED for Vercel + Render
-      sameSite: "none",    // REQUIRED for cross-domain cookies
+      secure: true,
+      sameSite: "none",
     },
   }));
 
-  // ---------- Routes ----------
+  // ---------------------------------------
+  // ROUTES
+  // ---------------------------------------
   const contactRoutes = require('./routes/contactRoutes');
   const reviewRoutes = require('./routes/reviewRoutes');
   const authRoutes = require('./routes/authRoutes');
@@ -110,11 +108,11 @@ mongoose.connect(mongoUri, {
   app.use('/api/members', memberRoutes);
   app.use('/api/reviews', reviewRoutes);
 
-  // ---------- Start server ----------
+  // ---------------------------------------
+  // START SERVER
+  // ---------------------------------------
   const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () =>
-    console.log(`🚀 Server running on port ${PORT}`)
-  );
+  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 
 })
 .catch(err => {
