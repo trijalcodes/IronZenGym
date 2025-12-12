@@ -4,9 +4,9 @@ const Plan = require('../models/Plan');
 
 exports.getDashboardStats = async (req, res) => {
   try {
-    // Check if user session exists (should already be handled by requireLogin middleware)
-    if (!req.session.user) {
-      return res.status(401).json({ message: "Unauthorized: No session found" });
+    // JWT Authentication: user info comes from req.user
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized: No token found" });
     }
 
     const totalContacts = await Contact.countDocuments();
@@ -24,7 +24,7 @@ exports.getDashboardStats = async (req, res) => {
 
     res.json({
       message: "Welcome to Admin Dashboard",
-      user: req.session.user, // You can safely send user details from session
+      user: req.user, // from JWT
       stats: {
         totalContacts,
         totalMembers,
@@ -37,6 +37,6 @@ exports.getDashboardStats = async (req, res) => {
 
   } catch (error) {
     console.error("Dashboard Error:", error.message);
-    res.status(500).json({ error: "Dashboard fetch failed" });
-  }
+    res.status(500).json({ error: "Dashboard fetch failed" });
+  }
 };
