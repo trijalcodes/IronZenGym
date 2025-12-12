@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import AdminLayout from "../layouts/AdminLayout.jsx";
+import AdminLayout from "../layouts/AdminLayout";
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);

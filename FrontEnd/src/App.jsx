@@ -17,6 +17,10 @@ import MemberManagement from './admin/src/pages/MemberManagement'
 import PlanManagement from './admin/src/pages/PlanManagement'
 import ChangePassword from './admin/src/pages/ChangePassword'
 import ReviewManagement from './admin/src/pages/ReviewManagement'
+import axios from "axios";
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = "https://ironzengym-1.onrender.com";
+
 
 const App = () => {
   return (
