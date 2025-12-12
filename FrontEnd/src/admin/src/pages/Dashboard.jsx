@@ -1,29 +1,55 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "../layouts/AdminLayout.jsx";
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
+  const navigate = useNavigate();
+
+  // 🔥 Ensure axios ALWAYS sends cookies across domains
+  axios.defaults.withCredentials = true;
+  axios.defaults.baseURL = "https://ironzengym-1.onrender.com";
 
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const res = await axios.get('https://ironzengym-1.onrender.com/api/dashboard',{ withCredentials:true });
+        const res = await axios.get("/api/dashboard");
+
+        // If backend says unauthorized, redirect
+        if (!res.data?.stats) {
+          navigate("/login");
+          return;
+        }
+
         setStats(res.data.stats);
       } catch (err) {
-        console.error("Error fetching dashboard:", err);
-        alert("Error: "+ err?.response?.data?.message);
+        console.error("Dashboard Fetch Error:", err);
+
+        // If session expired, redirect to login
+        if (err?.response?.status === 401 || err?.response?.status === 403) {
+          navigate("/login");
+          return;
+        }
       }
     };
+
     fetchDashboard();
   }, []);
 
-  if (!stats) return <div className="text-white">ACCES DENIED (LOG IN FIRST USING LOGIN PAGE)</div>;
+  if (!stats)
+    return (
+      <div className="text-white text-center mt-10">
+        ACCESS DENIED (LOG IN FIRST USING LOGIN PAGE)
+      </div>
+    );
 
   return (
     <AdminLayout>
       <div className="min-h-screen bg-gray-950 text-white p-8">
-        <h1 className="text-4xl font-bold mb-6 text-purple-400">Admin Dashboard</h1>
+        <h1 className="text-4xl font-bold mb-6 text-purple-400">
+          Admin Dashboard
+        </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <Card title="📥 Total Messages" value={stats.totalContacts} />
@@ -33,8 +59,16 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <RecentList title="Latest Members" list={stats.latestMembers} fields={["name", "mobile", "plan"]} />
-          <RecentList title="Recent Messages" list={stats.latestContacts} fields={["name", "email", "message"]} />
+          <RecentList
+            title="Latest Members"
+            list={stats.latestMembers}
+            fields={["name", "mobile", "plan"]}
+          />
+          <RecentList
+            title="Recent Messages"
+            list={stats.latestContacts}
+            fields={["name", "email", "message"]}
+          />
         </div>
       </div>
     </AdminLayout>
@@ -58,11 +92,13 @@ function RecentList({ title, list, fields }) {
         {list.map((item, i) => (
           <li key={i} className="bg-gray-800 p-3 rounded-md text-sm">
             {fields.map((f, idx) => (
-              <div key={idx}><span className="text-gray-400">{f}:</span> {item[f]}</div>
+              <div key={idx}>
+                <span className="text-gray-400">{f}:</span> {item[f]}
+              </div>
             ))}
           </li>
         ))}
       </ul>
-    </div>
-  );
+    </div>
+  );
 }

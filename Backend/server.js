@@ -9,14 +9,35 @@ const cookieParser = require('cookie-parser');
 // Initialize app
 const app = express();
 
-// CORS
+// ---------------------------------------
+// 🔥 Allowed Origins FIX
+// ---------------------------------------
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://iron-zen-gym-e24o.vercel.app"
+];
+
+// ---------------------------------------
+// 🔥 Global CORS FIX (must be at top)
+// ---------------------------------------
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+});
+
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://iron-zen-gym-e24o.vercel.app"   // ❗ removed trailing /
-  ],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true); // Thunder/Postman
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    console.log("❌ Blocked by CORS:", origin);
+    return callback(new Error("Not allowed by CORS"));
+  },
   credentials: true,
 }));
+
+app.options("*", cors());
 
 // Middleware
 app.use(express.json());
@@ -59,20 +80,23 @@ mongoose.connect(mongoUri, {
     };
   }
 
-  // Session Middleware NOW that DB is ready
- app.use(cors({
-  origin: function (origin, callback) {
-    // Allow requests with no origin (Thunder, Postman)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    } else {
-      console.log("❌ Blocked by CORS:", origin);
-      return callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-}));
+  // ---------------------------------------
+  // 🔥 Session Middleware FIX
+  // (Your original had wrong location + duplicate CORS)
+  // ---------------------------------------
+  app.use(session({
+    secret: process.env.SESSION_SECRET || "dev-secret",
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create(storeOptions),
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      httpOnly: true,
+      secure: true,        // REQUIRED for Vercel + Render
+      sameSite: "none",    // REQUIRED for cross-domain cookies
+    },
+  }));
+
   // ---------- Routes ----------
   const contactRoutes = require('./routes/contactRoutes');
   const reviewRoutes = require('./routes/reviewRoutes');
