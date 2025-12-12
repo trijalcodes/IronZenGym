@@ -11,8 +11,9 @@ const app = express();
 
 // CORS
 app.use(cors({
-  origin:["http://localhost:5173",
-    "https://iron-zen-gym-e24o.vercel.app/"
+  origin: [
+    "http://localhost:5173",
+    "https://iron-zen-gym-e24o.vercel.app"   // ❗ removed trailing /
   ],
   credentials: true,
 }));
@@ -52,7 +53,6 @@ mongoose.connect(mongoUri, {
       collectionName: 'sessions',
     };
   } else {
-    // fallback if mongoose doesn't expose client
     storeOptions = {
       mongoUrl: mongoUri,
       collectionName: 'sessions',
@@ -66,10 +66,12 @@ mongoose.connect(mongoUri, {
     saveUninitialized: false,
     store: MongoStore.create(storeOptions),
     cookie: {
-      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      maxAge: 1000 * 60 * 60 * 24,  // 1 day
       httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
+      
+      // 🔥 REQUIRED FOR VERCEL + RENDER CROSS-DOMAIN SESSION
+      sameSite: "none",
+      secure: true,
     },
   }));
 
