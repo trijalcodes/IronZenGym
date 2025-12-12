@@ -11,31 +11,30 @@ export default function Dashboard() {
   axios.defaults.withCredentials = true;
   axios.defaults.baseURL = "https://ironzengym-1.onrender.com";
 
-  useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const res = await axios.get("/api/dashboard");
+ useEffect(() => {
+  const fetchDashboard = async () => {
+    try {
+      const token = localStorage.getItem("token");
 
-        // If backend says unauthorized, redirect
-        if (!res.data?.stats) {
-          navigate("/login");
-          return;
+      const res = await axios.get(
+        "https://ironzengym-1.onrender.com/api/dashboard",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
+      );
 
-        setStats(res.data.stats);
-      } catch (err) {
-        console.error("Dashboard Fetch Error:", err);
+      setStats(res.data.stats);
+    } catch (err) {
+      console.error("Error fetching dashboard:", err);
+      alert("Error: " + err?.response?.data?.error);
+    }
+  };
 
-        // If session expired, redirect to login
-        if (err?.response?.status === 401 || err?.response?.status === 403) {
-          navigate("/login");
-          return;
-        }
-      }
-    };
+  fetchDashboard();
+}, []);
 
-    fetchDashboard();
-  }, []);
 
   if (!stats)
     return (

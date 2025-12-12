@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { getDashboardStats } = require('../controllers/dashboardController');
-const requireLogin = require('../middleware/requireLogin'); // ✅
+const authJWT = require("../middleware/authJWT");
 
-router.get('/', requireLogin, getDashboardStats); // ✅ Middleware applied
+router.get("/", authJWT, getDashboardStats);
+
 
 module.exports = router;
