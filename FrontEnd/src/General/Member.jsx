@@ -16,7 +16,7 @@ export default function Member() {
 
   // Fetch available plans from backend
   useEffect(() => {
-    axios.get('http://localhost:5000/api/plans')
+    axios.get('https://ironzengym-1.onrender.com/api/plans')
       .then((res) => {
         setPlans(res.data);
       })
@@ -40,7 +40,7 @@ export default function Member() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/members', formData);
+      await axios.post('https://ironzengym-1.onrender.com/api/members', formData);
       alert('🎉 Member added successfully!');
       setFormData({ name: '', mobile: '', gender: '', plan: '', price: '', address: '', location: '' });
     } catch (err) {

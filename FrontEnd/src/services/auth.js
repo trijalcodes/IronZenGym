@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const loginUser = async (email, password) => {
   try {
-    const res = await axios.post('http://localhost:5000/api/auth/login', {
+    const res = await axios.post('https://ironzengym-1.onrender.com/api/auth/login', {
       email,
       password,
     });

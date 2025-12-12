@@ -11,7 +11,9 @@ const app = express();
 
 // CORS
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin:["http://localhost:5173",
+    "https://iron-zen-gym-e24o.vercel.app/"
+  ],
   credentials: true,
 }));
 

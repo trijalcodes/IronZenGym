@@ -15,7 +15,7 @@ const ReviewManagement = () => {
 
   const fetchReviews = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/reviews", { withCredentials: true });
+      const res = await axios.get("https://ironzengym-1.onrender.com/api/reviews", { withCredentials: true });
       setReviews(res.data);
     } catch (err) {
       console.error("Failed to fetch reviews", err);

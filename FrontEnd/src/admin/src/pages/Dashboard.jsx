@@ -8,7 +8,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/dashboard',{ withCredentials:true });
+        const res = await axios.get('https://ironzengym-1.onrender.com/api/dashboard',{ withCredentials:true });
         setStats(res.data.stats);
       } catch (err) {
         console.error("Error fetching dashboard:", err);

@@ -13,7 +13,7 @@ export default function PlanManagement() {
 
   const fetchPlans = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/plans');
+      const res = await axios.get('https://ironzengym-1.onrender.com/api/plans');
       setPlans(res.data);
     } catch (err) {
       console.error('Failed to fetch plans', err);
@@ -23,7 +23,7 @@ export default function PlanManagement() {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this plan?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/plans/${id}`);
+      await axios.delete(`https://ironzengym-1.onrender.com/api/plans/${id}`);
       setPlans((prev) => prev.filter((plan) => plan._id !== id));
     } catch (err) {
       console.error('Delete failed', err);
@@ -37,7 +37,7 @@ export default function PlanManagement() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/plans', newPlan);
+      const res = await axios.post('https://ironzengym-1.onrender.com/api/plans', newPlan);
       setPlans((prev) => [...prev, res.data.plan]);
       setNewPlan({ title: '', duration: '', price: '', benefits: '' });
     } catch (err) {

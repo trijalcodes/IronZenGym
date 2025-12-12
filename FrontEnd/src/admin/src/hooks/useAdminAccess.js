@@ -9,7 +9,7 @@ const useAdminAccess = () => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/check-session", {
+        const res = await fetch("https://ironzengym-1.onrender.com/api/check-session", {
           method: "GET",
           credentials: "include",
         });

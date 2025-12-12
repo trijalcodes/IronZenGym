@@ -8,7 +8,7 @@ const ContactManagement = () => {
 
   const fetchContacts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/contacts',{ withCredentials:true });
+      const res = await axios.get('https://ironzengym-1.onrender.com/api/contacts',{ withCredentials:true });
       setContacts(res.data);
       setLoading(false);
     } catch (err) {
@@ -20,7 +20,7 @@ const ContactManagement = () => {
   const deleteContact = async (id) => {
     if (!window.confirm('Are you sure you want to delete this message?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/contacts/${id}`,);
+      await axios.delete(`https://ironzengym-1.onrender.com/api/contacts/${id}`,);
       setContacts(contacts.filter(contact => contact._id !== id));
     } catch (err) {
       console.error('Error deleting contact:', err);

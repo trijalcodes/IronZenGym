@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:5000/api/members';
+const BASE_URL = 'https://ironzengym-1.onrender.com/api/members';
 
 export const fetchMembers = async () => {
   const res = await axios.get(BASE_URL);

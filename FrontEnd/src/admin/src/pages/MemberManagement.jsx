@@ -7,7 +7,7 @@ export default function MemberManagement() {
 
   const fetchMembers = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/members');
+      const res = await axios.get('https://ironzengym-1.onrender.com/api/members');
       setMembers(res.data);
     } catch (err) {
       console.error('Failed to fetch members', err);
@@ -17,7 +17,7 @@ export default function MemberManagement() {
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this member?")) return;
     try {
-      await axios.delete(`http://localhost:5000/api/members/${id}`);
+      await axios.delete(`https://ironzengym-1.onrender.com/api/members/${id}`);
       setMembers((prev) => prev.filter((m) => m._id !== id));
     } catch (err) {
       console.error('Delete failed', err);

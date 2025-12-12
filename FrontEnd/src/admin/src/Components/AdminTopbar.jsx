@@ -28,7 +28,7 @@ const AdminTopbar = ({ toggleSidebar }) => {
     if (!confirmLogout) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/logout", {
+      const res = await fetch("https://ironzengym-1.onrender.com/api/auth/logout", {
         method: "POST",
         credentials: "include",
       });

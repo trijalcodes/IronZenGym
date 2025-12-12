@@ -8,7 +8,7 @@ const User = require('../models/User'); // adjust path
   const uri = (process.env.MONGO_URI || process.env.MONGODB_URI).trim();
   await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-  const email = process.env.DEFAULT_ADMIN_EMAIL || 'admin@example.com';
+  const email = process.env.DEFAULT_ADMIN_EMAIL || 'admin@ironzen.com';
   const password = process.env.DEFAULT_ADMIN_PASSWORD || 'Admin12345';
 
   const existing = await User.findOne({ email });

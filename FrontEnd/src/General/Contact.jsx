@@ -21,7 +21,7 @@ const Contact = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post('http://localhost:5000/api/contacts', formData);
+      const res = await axios.post('https://ironzengym-1.onrender.com/api/contacts', formData);
       alert('✅ Message sent successfully!');
       setFormData({ name: '', email: '', mobile: '', message: '' });
     } catch (error) {
