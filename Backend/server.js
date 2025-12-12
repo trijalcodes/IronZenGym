@@ -9,7 +9,7 @@ const cookieParser = require('cookie-parser');
 const app = express();
 
 // ---------------------------------------
-// ALLOWED ORIGINS (DEFINED FIRST)
+// ALLOWED ORIGINS
 // ---------------------------------------
 const allowedOrigins = [
   "http://localhost:5173",
@@ -17,7 +17,7 @@ const allowedOrigins = [
 ];
 
 // ---------------------------------------
-// GLOBAL CORS MIDDLEWARE (AT TOP)
+// GLOBAL CORS MIDDLEWARE
 // ---------------------------------------
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Credentials", "true");
@@ -26,10 +26,9 @@ app.use((req, res, next) => {
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow Postman/Thunder
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+
     console.log("❌ Blocked by CORS:", origin);
     return callback(new Error("Not allowed by CORS"));
   },
@@ -53,69 +52,71 @@ if (!mongoUri) {
   process.exit(1);
 }
 
-mongoose.connect(mongoUri, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(async () => {
-  console.log('✅ MongoDB connected');
+mongoose
+  .connect(mongoUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(async () => {
+    console.log("✅ MongoDB connected");
 
-  let storeOptions = {};
-  const client = mongoose.connection.getClient 
-    ? mongoose.connection.getClient()
-    : null;
+    let storeOptions = {};
+    const client = mongoose.connection.getClient
+      ? mongoose.connection.getClient()
+      : null;
 
-  if (client) {
-    storeOptions = {
-      client,
-      collectionName: 'sessions',
-    };
-  } else {
-    storeOptions = {
-      mongoUrl: mongoUri,
-      collectionName: 'sessions',
-    };
-  }
+    if (client) {
+      storeOptions = {
+        client,
+        collectionName: "sessions",
+      };
+    } else {
+      storeOptions = {
+        mongoUrl: mongoUri,
+        collectionName: "sessions",
+      };
+    }
 
-  // ---------------------------------------
-  // SESSION MIDDLEWARE
-  // ---------------------------------------
-  app.use(session({
-    secret: process.env.SESSION_SECRET || "dev-secret",
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create(storeOptions),
-    cookie: {
-      maxAge: 1000 * 60 * 60 * 24,
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-    },
-  }));
+    // ---------------------------------------
+    // SESSION (Correct location)
+    // ---------------------------------------
+    app.use(
+      session({
+        secret: process.env.SESSION_SECRET || "dev-secret",
+        resave: false,
+        saveUninitialized: false,
+        store: MongoStore.create(storeOptions),
+        cookie: {
+          maxAge: 1000 * 60 * 60 * 24,
+          httpOnly: true,
+          secure: true,
+          sameSite: "none",
+        },
+      })
+    );
 
-  // ---------------------------------------
-  // ROUTES
-  // ---------------------------------------
-  const contactRoutes = require('./routes/contactRoutes');
-  const reviewRoutes = require('./routes/reviewRoutes');
-  const authRoutes = require('./routes/authRoutes');
-  const memberRoutes = require('./routes/memberRoutes');
+    // ---------------------------------------
+    // ROUTES
+    // ---------------------------------------
+    const contactRoutes = require("./routes/contactRoutes");
+    const reviewRoutes = require("./routes/reviewRoutes");
+    const authRoutes = require("./routes/authRoutes");
+    const memberRoutes = require("./routes/memberRoutes");
 
-  app.use('/api/auth', authRoutes);
-  app.use('/api/dashboard', require('./routes/dashboardRoutes'));
-  app.use('/api/contacts', contactRoutes);
-  app.use('/api', require('./routes/planRoutes'));
-  app.use('/api/members', memberRoutes);
-  app.use('/api/reviews', reviewRoutes);
+    app.use("/api/auth", authRoutes);
+    app.use("/api/dashboard", require("./routes/dashboardRoutes"));
+    app.use("/api/contacts", contactRoutes);
+    app.use("/api", require("./routes/planRoutes"));
+    app.use("/api/members", memberRoutes);
+    app.use("/api/reviews", reviewRoutes);
 
-  // ---------------------------------------
-  // START SERVER
-  // ---------------------------------------
-  const PORT = process.env.PORT || 5000;
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-
-})
-.catch(err => {
-  console.error('❌ MongoDB connection error:', err);
-  process.exit(1);
-});
+    // ---------------------------------------
+    // START SERVER
+    // ---------------------------------------
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection error:", err);
+    process.exit(1);
+  });
