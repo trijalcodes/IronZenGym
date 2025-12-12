@@ -7,8 +7,6 @@ export default function Dashboard() {
   const [stats, setStats] = useState(null);
   const navigate = useNavigate();
 
-  // 🔥 Ensure axios ALWAYS sends cookies across domains
-  axios.defaults.withCredentials = true;
   axios.defaults.baseURL = "https://ironzengym-1.onrender.com";
 
  useEffect(() => {
