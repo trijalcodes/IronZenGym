@@ -37,13 +37,12 @@ app.use(cors({
 
 app.options(/.*/, cors());
 
-
 // ---------------------------------------
 app.use(express.json());
 app.use(cookieParser());
 
 // ---------------------------------------
-// MONGO CONNECTION
+// MONGO CONNECTION STRING
 // ---------------------------------------
 const rawUri = process.env.MONGO_URI || process.env.MONGODB_URI;
 const mongoUri = rawUri ? rawUri.trim() : null;
@@ -53,6 +52,30 @@ if (!mongoUri) {
   process.exit(1);
 }
 
+// ---------------------------------------
+// 🔥 SESSION MUST BE INITIALIZED BEFORE ROUTES AND BEFORE mongoose.then()
+// ---------------------------------------
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "dev-secret",
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: mongoUri,
+      collectionName: "sessions"
+    }),
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24,
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    },
+  })
+);
+
+// ---------------------------------------
+// CONNECT MONGO
+// ---------------------------------------
 mongoose
   .connect(mongoUri, {
     useNewUrlParser: true,
@@ -60,41 +83,6 @@ mongoose
   })
   .then(async () => {
     console.log("✅ MongoDB connected");
-
-    let storeOptions = {};
-    const client = mongoose.connection.getClient
-      ? mongoose.connection.getClient()
-      : null;
-
-    if (client) {
-      storeOptions = {
-        client,
-        collectionName: "sessions",
-      };
-    } else {
-      storeOptions = {
-        mongoUrl: mongoUri,
-        collectionName: "sessions",
-      };
-    }
-
-    // ---------------------------------------
-    // SESSION (Correct location)
-    // ---------------------------------------
-    app.use(
-      session({
-        secret: process.env.SESSION_SECRET || "dev-secret",
-        resave: false,
-        saveUninitialized: false,
-        store: MongoStore.create(storeOptions),
-        cookie: {
-          maxAge: 1000 * 60 * 60 * 24,
-          httpOnly: true,
-          secure: true,
-          sameSite: "none",
-        },
-      })
-    );
 
     // ---------------------------------------
     // ROUTES
